@@ -1,0 +1,21 @@
+{
+  "name": "Corsair Cove QoL Trainer",
+  "game": "Corsair Cove",
+  "nexusGame": "corsaircove",
+  "nexusModId": 35,
+  "nexusUrl": "https://www.nexusmods.com/corsaircove/mods/35",
+  "pageVersion": "1.2.4",
+  "sourceStatus": "release-workspace",
+  "sourceNote": "Source from the published-release workspace; binaries are downloaded from Nexus. No new runtime test was performed for this source import.",
+  "currentFiles": [
+    {
+      "fileId": 71,
+      "name": "Corsair Cove QoL Trainer - Single EXE",
+      "version": "1.2.4",
+      "category": "MAIN",
+      "sha256": "354ba01e3fe1fa47c5c429fc91610e196d0017e2e49baa22e8ea9270b15f7d00",
+      "bytes": 9442719,
+      "downloadUrl": "https://www.nexusmods.com/corsaircove/mods/35?tab=files&file_id=71"
+    }
+  ]
+}

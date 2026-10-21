@@ -1,0 +1,11 @@
+{
+  "name": "corsair-cove-qol-source",
+  "private": true,
+  "version": "1.2.4",
+  "scripts": {
+    "test": "node Tests/run-backend.js"
+  },
+  "devDependencies": {
+    "fengari": "0.1.5"
+  }
+}
