@@ -7,11 +7,11 @@ static void FakeSetRadius(void* model,void* camp,float value) {
     static_cast<unsigned char*>(model)[0x2f48]=1;
 }
 static void RunCampRadiusTests() {
-    std::array<unsigned char,0x3ca0> model{};
+    std::array<unsigned char,0x3d00> model{};
     std::array<unsigned char,0x400> camp{},data{};
     unsigned char live=1;
     struct Handle {void* pointer;void* control;} camps[]={{camp.data(),&live}};
-    AttackWrite<void*>(model.data(),0x1898,camps);AttackWrite<int>(model.data(),0x18a0,1);
+    AttackWrite<void*>(model.data(),0x18b0,camps);AttackWrite<int>(model.data(),0x18b8,1);
     AttackWrite<void*>(camp.data(),0x2e8,data.data());
     AttackWrite<float>(data.data(),0x328,3000);AttackWrite<float>(data.data(),0x32c,3750);
     CampRadiusState state;state.Configure(50);state.Update(model.data(),FakeSetRadius);

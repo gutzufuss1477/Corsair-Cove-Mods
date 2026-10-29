@@ -1,7 +1,7 @@
 // Run the actual shipped Lua script in Lua 5.3 with a deterministic UE4SS test host.
 const fs = require('fs');
 const path = require('path');
-const {lua, lauxlib, lualib, to_luastring, to_jsstring} = require('fengari');
+const {lua, lauxlib, lualib, to_luastring, to_jsstring} = require('../../Tools/LuaTests/node_modules/fengari');
 const L = lauxlib.luaL_newstate();
 lualib.luaL_openlibs(L);
 lua.lua_pushstring(L, to_luastring(fs.readFileSync(path.join(__dirname, '../Scripts/main.lua'), 'utf8')));

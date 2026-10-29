@@ -22,7 +22,13 @@ static void Require(bool ok,const char* reason){++checks;if(!ok)throw std::runti
 #include "WarehouseTests.h"
 int main() {
     try {
-        RunAttackTests();RunFogTests();RunShipTests();RunCarrierTests();RunLocomotionTests();RunBattleTests();RunCampRadiusTests();RunHousingTests();RunHousingTooltipTests();RunWarehouseTests();
+        // Flush suite names so a native fault still identifies its fixture.
+        #define RUN_SUITE(name) do {std::cerr<<#name<<std::endl;name();} while(false)
+        RUN_SUITE(RunAttackTests);RUN_SUITE(RunFogTests);RUN_SUITE(RunShipTests);
+        RUN_SUITE(RunCarrierTests);RUN_SUITE(RunLocomotionTests);RUN_SUITE(RunBattleTests);
+        RUN_SUITE(RunCampRadiusTests);RUN_SUITE(RunHousingTests);
+        RUN_SUITE(RunHousingTooltipTests);RUN_SUITE(RunWarehouseTests);
+        #undef RUN_SUITE
         for(float mult:{1.0f,2.5f,5.0f,10.0f}) {
             walkMultiplier=mult;
             Require(TestStep(300)==300*mult,"Actual simulation stub");

@@ -13,7 +13,7 @@ template<class T,size_t N> static void HousingPut(std::array<unsigned char,N>& a
     std::memcpy(a.data()+at,&value,sizeof(value));
 }
 static void RunHousingTooltipTests() {
-    std::array<unsigned char,0x20a0> model{};
+    std::array<unsigned char,0x20d0> model{};
     std::array<unsigned char,0x320> camp{},house{},second{},building{};
     std::array<unsigned char,0x240> data{};
     std::array<unsigned char,0x30> link{},context{},otherContext{};
@@ -22,7 +22,7 @@ static void RunHousingTooltipTests() {
     struct Handle{void* object;unsigned char* control;};
     std::array<Handle,4> handles{{{house.data(),&live},{camp.data(),&live},{second.data(),&live},{nullptr,nullptr}}};
     int campBeds=25,houseBeds=308,secondBeds=40,vanillaPopulation=2;
-    HousingPut(model,0x2090,Handle{camp.data(),&live});
+    HousingPut(model,0x20b8,Handle{camp.data(),&live});
     HousingPut(camp,0x2e8,data.data());HousingPut(camp,0x308,&campBeds);
     HousingPut(house,0x308,&houseBeds);
     HousingPut(second,0x2e8,data.data());HousingPut(second,0x308,&secondBeds);
@@ -59,15 +59,15 @@ static void RunHousingTooltipTests() {
     HousingPut(data,0x190,static_cast<void*>(nullptr));Require(value()==0,"No WorkerPool matches vanilla zero housing");HousingPut(data,0x190,data.data());
     campBeds=0;Require(value()==0,"Zero capacity stays zero");campBeds=-1;Require(value()==2,"Unknown sentinel uses original UI instead of inventing beds");campBeds=INT_MAX;Require(value()==INT_MAX,"Very large camp capacity saturates safely");campBeds=25;
     HousingPut(data,0x238,-1);Require(value()==2,"Invalid array count falls back safely");HousingPut(data,0x238,2);
-    HousingPut(model,0x2090,Handle{building.data(),&live});HousingPut(building,0x2f8,link.data());HousingPut(link,0x10,Handle{camp.data(),&live});
+    HousingPut(model,0x20b8,Handle{building.data(),&live});HousingPut(building,0x2f8,link.data());HousingPut(link,0x10,Handle{camp.data(),&live});
     Require(value()==250,"Selecting an attached building resolves its connected camp");
     HousingPut(link,0x10,Handle{second.data(),&live});
-    HousingPut(model,0x2090,Handle{second.data(),&live});
+    HousingPut(model,0x20b8,Handle{second.data(),&live});
     std::array<Handle,1> secondList{{{second.data(),&live}}};
     HousingPut(data,0x230,secondList.data());HousingPut(data,0x238,1);
     Require(value()==400,"Camp switching reads current selection without retaining pointers");
-    HousingPut(model,0x2090,Handle{nullptr,nullptr});Require(value()==2,"Missing selection restores original result");
-    HousingPut(model,0x2090,Handle{camp.data(),&live});HousingPut(data,0x230,handles.data());HousingPut(data,0x238,2);
+    HousingPut(model,0x20b8,Handle{nullptr,nullptr});Require(value()==2,"Missing selection restores original result");
+    HousingPut(model,0x20b8,Handle{camp.data(),&live});HousingPut(data,0x230,handles.data());HousingPut(data,0x238,2);
     const auto updates=housingTooltip.updates;Require(value()==250&&housingTooltip.updates==updates+1&&housingTooltip.lastCampBeds==250,"Status counts actual corrected UI reads");
     Require(model==originalModel&&camp==originalCamp&&house==originalHouse&&data==originalData,"Tooltip leaves model, capacities, housing and save data byte-identical");
     Require(MH_DisableHook(site)==MH_OK&&value()==2,"Removing tooltip hook restores vanilla presentation");

@@ -79,7 +79,7 @@ local function fixture(raw,withoutNative)
       local d={}
       for k,v in (h.files['TEST\\CorsairCoveQoL\\native-request.ini'] or ''):gmatch('([A-Za-z]+)=([^\n]*)')do d[k]=v end
       h.native=d
-      h.files['TEST\\CorsairCoveQoL\\native-status.ini']='Version=1.2.4\nReady=1\nError=\nRevision='..
+      h.files['TEST\\CorsairCoveQoL\\native-status.ini']='Version=1.2.5\nReady=1\nError=\nRevision='..
         (h.nativeStale and 'stale' or d.Revision or '')..'\nTransportFactor='..(d.TransportFactor or '1')..
         '\nWorkerMovementAddress='..(h.workerMismatch and '0' or d.WorkerMovementAddress or '0')..
         '\nLocomotionDefaultCalls=21\nLocomotionOverrideCalls=4'..

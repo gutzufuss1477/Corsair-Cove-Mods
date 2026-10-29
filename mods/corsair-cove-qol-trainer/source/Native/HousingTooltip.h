@@ -15,7 +15,7 @@ static void* HousingHandle(const void* handle) {
 static bool HousingCampContribution(void* model,unsigned long steps,
     HousingEligibilityFn operational,HousingEligibilityFn excluded,int& result) {
     if(!model||!operational||!excluded||steps<10||steps>1000)return false;
-    auto selected=HousingHandle(static_cast<unsigned char*>(model)+0x2090);
+    auto selected=HousingHandle(static_cast<unsigned char*>(model)+0x20b8);
     if(!selected)return false;
     auto link=AttackRead<unsigned char*>(selected,0x2f8);
     auto camp=link?HousingHandle(link+0x10):selected;

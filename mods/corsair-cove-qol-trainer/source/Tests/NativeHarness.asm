@@ -436,7 +436,7 @@ GameAttackTickFixture PROC FRAME
     sub rsp,1c8h
     .allocstack 1c8h
     .endprolog
-    mov rax,QWORD PTR [rcx+3bd0h]
+    mov rax,QWORD PTR [rcx+3c20h]
     mov rax,QWORD PTR [rax]
     mov eax,DWORD PTR [rax+0b8h]
     add rsp,1c8h

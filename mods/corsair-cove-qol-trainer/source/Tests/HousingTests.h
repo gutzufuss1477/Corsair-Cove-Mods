@@ -83,6 +83,6 @@ static void RunHousingConfigTests() {
     Require(error.empty()&&campHousingSteps==10,"Native protocol restores x1 on disable");
     Status();
     std::ifstream f(folder+L"native-status.ini");std::string status((std::istreambuf_iterator<char>(f)),std::istreambuf_iterator<char>());
-    Require(status.find("Version=1.2.4\n")!=std::string::npos&&status.find("CampHousingSteps=10\n")!=std::string::npos,
+    Require(status.find("Version=1.2.5\n")!=std::string::npos&&status.find("CampHousingSteps=10\n")!=std::string::npos,
         "Native status acknowledges both new version and actual housing setting");
 }

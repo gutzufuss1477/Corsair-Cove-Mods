@@ -16,8 +16,8 @@ template<class T> static T AttackRead(const void* p,size_t offset) {
 // points. Several camps can therefore share one attack point.
 static bool NearestCoast(const void* model,const void* point,const void* campXY) {
     if(!model||!point||!campXY)return false;
-    const auto list=AttackRead<const unsigned char*>(model,0x3bd0);
-    const int count=AttackRead<int>(model,0x3bd8);
+    const auto list=AttackRead<const unsigned char*>(model,0x3c20);
+    const int count=AttackRead<int>(model,0x3c28);
     if(count<=0||count>8192||!list)return false;
     const double x=AttackRead<double>(campXY,0),y=AttackRead<double>(campXY,8);
     if(!std::isfinite(x)||!std::isfinite(y))return false;
@@ -46,8 +46,8 @@ struct AttackRefreshState {
     void Invalidate() {++requested;invalid=false;}
     void Update(void* model,AttackPointFn camps,AttackPointFn towers) {
         if(!requested||!model||!camps||!towers||busy)return;
-        auto list=AttackRead<unsigned char*>(model,0x3bd0);
-        int count=AttackRead<int>(model,0x3bd8);
+        auto list=AttackRead<unsigned char*>(model,0x3c20);
+        int count=AttackRead<int>(model,0x3c28);
         // Do not interpret allocator-specific capacity flags; game traversal
         // uses only the pointer and count for this array of 16-byte handles.
         if(count<0||count>8192||(count>0&&!list)) {invalid=true;return;}
@@ -69,7 +69,7 @@ struct AttackRefreshState {
         }
         // Same fortification invalidation flag used after the game's own range
         // refresh. No construction/logistics dirty flag and no global recalc.
-        static_cast<unsigned char*>(model)[0x3c90]=1;
+        static_cast<unsigned char*>(model)[0x3ce0]=1;
         lastModel=model;lastPoints=list;lastCount=count;
         points=count;eligible=covered;applied=generation;++refreshes;
         invalid=false;busy=false;

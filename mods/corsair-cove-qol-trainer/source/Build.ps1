@@ -3,8 +3,8 @@ $ErrorActionPreference='Stop'
 $root=$PSScriptRoot
 $workspace=Split-Path $root -Parent
 $compiler=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
-$release=Join-Path $root 'Releases\CoveQoLTrainer-1.2.4'
-$build=Join-Path $root 'Build\Release-1.2.4'
+$release=Join-Path $root 'Releases\CoveQoLTrainer-1.2.5'
+$build=Join-Path $root 'Build\Release-1.2.5'
 New-Item -ItemType Directory -Force -Path $release,$build | Out-Null
 if(!$UiOnly){& "$root\Native\Build-Native.ps1" -Test:$Test}
 $runtime=Join-Path $DependencyRoot 'UE4SS_v3.0.1-1165-g12ec45a0'
@@ -41,17 +41,17 @@ if($Test){
  if($LASTEXITCODE){throw 'Backend tests failed.'}}
  & $compiler @common /target:exe /main:ReleaseTests "/out:$build\ReleaseTests.exe" @resources @sources "$root\Tests\ReleaseTests.cs" "$root\Tests\SetupTests.cs"
  if($LASTEXITCODE){throw 'Release tests compilation failed.'}
- $renders=Join-Path $root 'Analysis\Release-1.2.4'
+ $renders=Join-Path $root 'Analysis\Release-1.2.5'
  New-Item -ItemType Directory -Force -Path $renders|Out-Null
  & "$build\ReleaseTests.exe" $renders
  if($LASTEXITCODE){throw 'Release tests failed.'}
 }
 Copy-Item -LiteralPath "$release\CoveQoLTrainer.exe" -Destination "$root\UI\CoveQoLTrainer.exe" -Force
-$archive=Join-Path $root 'Releases\CoveQoLTrainer-1.2.4.zip'
+$archive=Join-Path $root 'Releases\CoveQoLTrainer-1.2.5.zip'
 Compress-Archive -LiteralPath "$release\CoveQoLTrainer.exe" -DestinationPath $archive -Force
 $manifest=@{}
 foreach($entry in $files.GetEnumerator()){$manifest[$entry.Key]=(Get-FileHash -LiteralPath $entry.Value -Algorithm SHA256).Hash.ToLowerInvariant()}
 $manifest['CoveQoLTrainer.exe']=(Get-FileHash -LiteralPath "$release\CoveQoLTrainer.exe" -Algorithm SHA256).Hash.ToLowerInvariant()
-$manifest['CoveQoLTrainer-1.2.4.zip']=(Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
-$manifest|ConvertTo-Json|Set-Content "$root\Analysis\release-v124-hashes.json"
+$manifest['CoveQoLTrainer-1.2.5.zip']=(Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+$manifest|ConvertTo-Json|Set-Content "$root\Analysis\release-v125-hashes.json"
 Write-Output "Build complete: $release"

@@ -164,16 +164,16 @@ internal static class ReleaseTests {
       }
       DateTime now=DateTime.UtcNow;
       long epoch=(long)(now-new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc)).TotalSeconds;
-      var d=new Dictionary<string,string>{{"Version","1.2.4"},{"Heartbeat",epoch.ToString()},{"Revision","r1"},{"Status","Applied"},{"NativeReady","1"},
+      var d=new Dictionary<string,string>{{"Version","1.2.5"},{"Heartbeat",epoch.ToString()},{"Revision","r1"},{"Status","Applied"},{"NativeReady","1"},
         {"TransportState","Applied"},{"RoutesState","Applied"},{"BattleProtectionState","Applied"},{"ShipsState","Applied"},{"ConstructionState","Applied"},{"CampRadiusState","Applied"},{"CampHousingState","Applied"},{"WarehouseState","Applied"},{"BridgesState","Applied"},{"CampOverlapState","Applied"},{"NearestCoastState","Applied"},{"KeepRevealedState","Applied"}};
       Check(TrainerForm.HasCurrentHeartbeat(d,now.AddSeconds(-60),now),"recent heartbeat in this process accepted");
       Check(!TrainerForm.HasCurrentHeartbeat(d,now.AddSeconds(-60),now.AddSeconds(20)),"stale heartbeat rejected");
       Check(!TrainerForm.HasCurrentHeartbeat(d,now.AddSeconds(4),now),"previous process heartbeat rejected");
       Check(TrainerForm.IsApplied(d,"r1")&&!TrainerForm.IsApplied(d,"r2"),"only matching saved revision acknowledged");
       d.Remove("CampHousingState");Check(!TrainerForm.IsApplied(d,"r1"),"housing native acknowledgement is required for overall success");d["CampHousingState"]="Applied";
-      d["Version"]="1.0.0";Check(!TrainerForm.HasCurrentHeartbeat(d,now.AddSeconds(-60),now),"old release backend cannot confirm new housing option");d["Version"]="1.2.4";
+      d["Version"]="1.0.0";Check(!TrainerForm.HasCurrentHeartbeat(d,now.AddSeconds(-60),now),"old release backend cannot confirm new housing option");d["Version"]="1.2.5";
       d.Remove("KeepRevealedState");Check(!TrainerForm.IsApplied(d,"r1"),"fog confirmation required for overall success");d["KeepRevealedState"]="Applied";
-      d["Version"]="0.12.0";Check(!TrainerForm.HasCurrentHeartbeat(d,now.AddSeconds(-60),now),"older backend cannot acknowledge route or battle changes");d["Version"]="1.2.4";
+      d["Version"]="0.12.0";Check(!TrainerForm.HasCurrentHeartbeat(d,now.AddSeconds(-60),now),"older backend cannot acknowledge route or battle changes");d["Version"]="1.2.5";
       d["NearestCoastState"]="Waiting";Check(!TrainerForm.IsApplied(d,"r1"),"pending attack cache refresh blocks overall acknowledgement");d["NearestCoastState"]="Applied";
       d.Remove("CampOverlapState");Check(!TrainerForm.IsApplied(d,"r1"),"overlap must be confirmed before overall success");d["CampOverlapState"]="Applied";
       d.Remove("ConstructionState");Check(!TrainerForm.IsApplied(d,"r1"),"construction must be confirmed before overall success");d["ConstructionState"]="Applied";

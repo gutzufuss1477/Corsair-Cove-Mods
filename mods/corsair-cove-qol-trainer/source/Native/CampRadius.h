@@ -13,10 +13,10 @@ struct CampRadiusState {
     void Configure(float value) {if(!configured||factor!=value)pending=true;factor=value;configured=true;}
     void Update(void* model,SetCampRadiusFn setRadius) {
         if(!configured||!model||!setRadius)return;
-        auto list=AttackRead<unsigned char*>(model,0x1898);
-        int count=AttackRead<int>(model,0x18a0);
-        auto coast=AttackRead<unsigned char*>(model,0x3bd0);
-        int points=AttackRead<int>(model,0x3bd8);
+        auto list=AttackRead<unsigned char*>(model,0x18b0);
+        int count=AttackRead<int>(model,0x18b8);
+        auto coast=AttackRead<unsigned char*>(model,0x3c20);
+        int points=AttackRead<int>(model,0x3c28);
         invalid=count<0||count>4096||(count&&!list)||points<0||points>8192||(points&&!coast);
         if(invalid)return;
         for(int i=0;i<points;++i) {

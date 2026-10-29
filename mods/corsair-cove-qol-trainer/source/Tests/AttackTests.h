@@ -28,13 +28,13 @@ static void FakeAttackTowers(void*,void* point) {
 }
 static void RunAttackTests() {
     Require(MH_Initialize()==MH_OK,"Attack test hook engine initializes");
-    std::array<unsigned char,0x3ca0> model{};
+    std::array<unsigned char,0x3d00> model{};
     std::array<unsigned char,0xf0> nearPoint{},farPoint{};
     unsigned char live=1;
     struct Handle {void* point;void* control;};
     Handle points[]={{nearPoint.data(),&live},{farPoint.data(),&live}};
-    AttackWrite<void*>(model.data(),0x3bd0,points);
-    AttackWrite<int>(model.data(),0x3bd8,2);AttackWrite<int>(model.data(),0x3bdc,2);
+    AttackWrite<void*>(model.data(),0x3c20,points);
+    AttackWrite<int>(model.data(),0x3c28,2);AttackWrite<int>(model.data(),0x3c2c,2);
     AttackWrite<double>(nearPoint.data(),0x70,5000);AttackWrite<double>(farPoint.data(),0x70,50000);
     double campXY[]={0,0};
     Require(NearestCoast(model.data(),nearPoint.data(),campXY)&&!NearestCoast(model.data(),farPoint.data(),campXY),
@@ -58,11 +58,11 @@ static void RunAttackTests() {
     Require(NearestCoast(model.data(),farPoint.data(),campXY),"Non-finite coast coordinates excluded");
     AttackWrite<double>(nearPoint.data(),0x70,5000);
     live=0;Require(!NearestCoast(model.data(),nearPoint.data(),campXY),"Invalid point handles never selected");live=1;
-    AttackWrite<int>(model.data(),0x3bd8,0);
+    AttackWrite<int>(model.data(),0x3c28,0);
     Require(!NearestCoast(model.data(),nearPoint.data(),campXY),"Empty coast never grants blanket eligibility");
-    AttackWrite<int>(model.data(),0x3bd8,9000);
+    AttackWrite<int>(model.data(),0x3c28,9000);
     Require(!NearestCoast(model.data(),nearPoint.data(),campXY),"Invalid coast count bounded before traversal");
-    AttackWrite<int>(model.data(),0x3bd8,2);
+    AttackWrite<int>(model.data(),0x3c28,2);
     std::array<unsigned char,0xf0> outsider{};
     Require(!NearestCoast(model.data(),outsider.data(),campXY),"Point outside current model cannot be selected");
 
@@ -119,7 +119,7 @@ static void RunAttackTests() {
     Require(GameAttackTickFixture(model.data())==1&&!attackRefresh.Pending(),"Cached membership rebuilt before original attack tick");
     Require(attackRefresh.points==2&&attackRefresh.eligible==1&&campRefreshCalls==2&&towerRefreshCalls==2,
         "Both camp and dependent tower lists updated for every coast point");
-    Require(AttackRead<int>(farPoint.data(),0xb8)==0&&AttackRead<int>(farPoint.data(),0xa8)==0&&model[0x3c90]==1,
+    Require(AttackRead<int>(farPoint.data(),0xb8)==0&&AttackRead<int>(farPoint.data(),0xa8)==0&&model[0x3ce0]==1,
         "Distant eligibility removed and fortification invalidation signaled");
     for(int i=0;i<100;++i)GameAttackTickFixture(model.data());
     Require(campRefreshCalls==2&&attackRefresh.refreshes==1,"Idle ticks do not repeat coastal recalculation");
@@ -130,16 +130,16 @@ static void RunAttackTests() {
     auto before=attackRefresh.refreshes;
     attackRefresh.Invalidate();GameAttackTickFixture(model.data());
     Require(attackRefresh.refreshes==before+1,"Map token forces refresh even when model address is reused");
-    AttackWrite<int>(model.data(),0x3bd8,1);GameAttackTickFixture(model.data());
+    AttackWrite<int>(model.data(),0x3c28,1);GameAttackTickFixture(model.data());
     Require(attackRefresh.points==1,"Changed point array shape rebuilds with live model context");
     attackRefresh.Invalidate();live=0;GameAttackTickFixture(model.data());
     Require(attackRefresh.invalid&&attackRefresh.Pending(),"Invalid handle rejects refresh without acknowledging completion");
     live=1;GameAttackTickFixture(model.data());Require(!attackRefresh.invalid&&!attackRefresh.Pending(),"Refresh recovers on valid lifecycle data");
-    AttackWrite<int>(model.data(),0x3bd8,9000);before=attackRefresh.refreshes;RefreshAttackPoints(model.data());
+    AttackWrite<int>(model.data(),0x3c28,9000);before=attackRefresh.refreshes;RefreshAttackPoints(model.data());
     Require(attackRefresh.invalid&&attackRefresh.refreshes==before,"Unexpected array size never traversed");
-    AttackWrite<int>(model.data(),0x3bd8,0);AttackWrite<void*>(model.data(),0x3bd0,nullptr);RefreshAttackPoints(model.data());
+    AttackWrite<int>(model.data(),0x3c28,0);AttackWrite<void*>(model.data(),0x3c20,nullptr);RefreshAttackPoints(model.data());
     Require(!attackRefresh.invalid&&attackRefresh.points==0&&attackRefresh.eligible==0,"Empty coast preserves normal no-candidate behavior");
-    AttackWrite<void*>(model.data(),0x3bd0,points);AttackWrite<int>(model.data(),0x3bd8,2);
+    AttackWrite<void*>(model.data(),0x3c20,points);AttackWrite<int>(model.data(),0x3c28,2);
     nearestCoastEnabled=1;attackRefresh.Invalidate();GameAttackTickFixture(model.data());
     Require(attackRefresh.eligible==1,"Nearest mode rebuilds to exactly one point for one eligible camp");
     // The game's camp-change paths call the same membership function directly.

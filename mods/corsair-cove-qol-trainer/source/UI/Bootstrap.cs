@@ -54,7 +54,7 @@ namespace CoveQoLTrainer {
     }
   }
   internal static class Bootstrap {
-    internal const string GameHash="c8d9fea9f172b79a43b226c9a58ff021dcc5ecbcc410c5dca2155b70f4ad5195";
+    internal const string GameHash="86a0430db6bcba963a97a36b5d9e4bc0366989e65ff8ce6735e0cfe0aec42f32";
     internal static readonly string[] PayloadNames={"dwmapi.dll","ue4ss/UE4SS.dll","ue4ss/UE4SS-settings.ini","ue4ss/LICENSE","ue4ss/Mods/CoveQoLTrainer/Scripts/main.lua","ue4ss/Mods/CoveQoLTrainer/Scripts/WarehouseUI.lua","ue4ss/Mods/CoveQoLTrainer/Scripts/CoveQoLNative.dll","msvcp140.dll","msvcp140_1.dll","msvcp140_2.dll","msvcp140_atomic_wait.dll","msvcp140_codecvt_ids.dll","vcruntime140.dll","vcruntime140_1.dll","concrt140.dll"};
     internal static string Hash(string path){using(var stream=File.OpenRead(path))using(var hash=SHA256.Create())return BitConverter.ToString(hash.ComputeHash(stream)).Replace("-","").ToLowerInvariant();}
     internal static string Hash(byte[] data){using(var hash=SHA256.Create())return BitConverter.ToString(hash.ComputeHash(data)).Replace("-","").ToLowerInvariant();}

@@ -8,8 +8,8 @@ using System.Globalization;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
-[assembly: AssemblyVersion("1.2.4.0")]
-[assembly: AssemblyFileVersion("1.2.4.0")]
+[assembly: AssemblyVersion("1.2.5.0")]
+[assembly: AssemblyFileVersion("1.2.5.0")]
 [assembly: AssemblyProduct("Corsair Cove QoL Trainer")]
 namespace CoveQoLTrainer {
   internal static class Program {
@@ -70,7 +70,7 @@ namespace CoveQoLTrainer {
       string selected="auto";
       try{if(File.Exists(prefsPath))selected=Value(ReadIni(prefsPath),"Language","auto");}catch{}
       L=new Localization(selected=="auto"?Localization.Detect(game):selected);
-      Text="Corsair Cove | QoL Trainer 1.2.4";
+      Text="Corsair Cove | QoL Trainer 1.2.5";
       Icon=Icon.ExtractAssociatedIcon(Application.ExecutablePath);
       // All resize geometry comes from one immutable 96-DPI layout. Mixing
       // repeated WinForms Scale calls and inherited fonts clipped the heading.
@@ -125,7 +125,7 @@ namespace CoveQoLTrainer {
     }
     void Build() {
       LabelAt(this,"CORSAIR COVE",18,7,320,48,ink,new Font("Segoe UI Semibold",22F));
-      LabelAt(this,"QOL TRAINER  /  1.2.4",354,20,290,30,accent,new Font("Segoe UI Semibold",11F));
+      LabelAt(this,"QOL TRAINER  /  1.2.5",354,20,290,30,accent,new Font("Segoe UI Semibold",11F));
       language=new ComboBox{DropDownStyle=ComboBoxStyle.DropDownList,Location=new Point(662,22),Size=new Size(200,27),BackColor=card,ForeColor=ink,FlatStyle=FlatStyle.Flat};
       Controls.Add(language);language.SelectedIndexChanged+=(s,e)=>{if(!translating)SetLanguage(language.SelectedIndex==0?"auto":Localization.Codes[language.SelectedIndex-1],true);};
       status=LabelAt(this,"",20,55,840,27,muted,main);
@@ -162,7 +162,7 @@ namespace CoveQoLTrainer {
       using(var dialog=new Form{Text=L["help"],ClientSize=new Size(650,390),StartPosition=FormStartPosition.CenterParent,BackColor=bg,ForeColor=ink,Font=main,MinimizeBox=false,MaximizeBox=false}) {
         var body=new TextBox{Multiline=true,ReadOnly=true,ScrollBars=ScrollBars.Vertical,Dock=DockStyle.Fill,BackColor=card,ForeColor=ink,BorderStyle=BorderStyle.None};
         string license="";using(var stream=Assembly.GetExecutingAssembly().GetManifestResourceStream("Notices.txt"))if(stream!=null)using(var reader=new StreamReader(stream))license=reader.ReadToEnd();
-        body.Text=L["helpBody"]+"\r\n\r\nCorsair Cove QoL Trainer 1.2.4\r\n\r\n"+license;dialog.Controls.Add(body);dialog.ShowDialog(this);
+        body.Text=L["helpBody"]+"\r\n\r\nCorsair Cove QoL Trainer 1.2.5\r\n\r\n"+license;dialog.Controls.Add(body);dialog.ShowDialog(this);
       }
     }
     void Changed(){if(!loading&&saved!=null){dirty=true;saved.Text=L["dirty"];saved.ForeColor=warning;}}
@@ -273,7 +273,7 @@ namespace CoveQoLTrainer {
     static string Value(Dictionary<string,string> d,string key,string fallback){string v;return d.TryGetValue(key,out v)?v:fallback;}
     internal static bool HasCurrentHeartbeat(Dictionary<string,string> d,DateTime started,DateTime now){
       long heartbeat;
-      if(Value(d,"Version","")!="1.2.4"||!long.TryParse(Value(d,"Heartbeat",""),out heartbeat))return false;
+      if(Value(d,"Version","")!="1.2.5"||!long.TryParse(Value(d,"Heartbeat",""),out heartbeat))return false;
       DateTime at;
       try {at=new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc).AddSeconds(heartbeat);}catch{return false;}
       return at>=started.AddSeconds(-2)&&(now-at).TotalSeconds>=-2&&(now-at).TotalSeconds<15;

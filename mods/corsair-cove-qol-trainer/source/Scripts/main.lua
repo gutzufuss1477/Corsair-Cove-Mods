@@ -1,4 +1,4 @@
--- Cove QoL Trainer 1.2.4. Native QoL hooks, Lua asset limits.
+-- Cove QoL Trainer 1.2.5. Native QoL hooks, Lua asset limits.
 -- Restart after upgrading. Duplicate loads must not multiply values twice.
 if _G.CoveQoLTrainerActive then
   print('[CoveQoL] Already loaded. Restart the game to upgrade the backend.')
@@ -8,7 +8,7 @@ local src=debug.getinfo(1,'S').source
 local dir=src:sub(1,1)=='@' and src:sub(2):match('^(.*[/\\])') or ''
 local dataDir=(os.getenv('LOCALAPPDATA') or '')..'\\CorsairCoveQoL\\'
 local settingsPath,statusPath=dataDir..'settings.ini',dataDir..'status.ini'
-local VERSION='1.2.4'
+local VERSION='1.2.5'
 local cfg,loadedSettings,lastResult
 local nativeRefresh,nativeError,nativeStatus
 local warehouseUI,warehouseUiError,warehouseUiTouched
