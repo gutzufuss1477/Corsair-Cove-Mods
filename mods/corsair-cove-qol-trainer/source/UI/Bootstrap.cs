@@ -15,7 +15,9 @@ using Microsoft.Win32;
 namespace CoveQoLTrainer {
   internal sealed class SetupException:Exception {
     public readonly string Key;
-    public SetupException(string key):base(key){Key=key;}
+    public readonly string Detail;
+    public SetupException(string key,string detail=null):base(key){Key=key;Detail=detail;}
+    public string Localized(Localization lang){return Detail==null?lang[Key]:lang[Key]+"\n\n"+Detail;}
   }
   internal sealed class SetupPlan {
     internal readonly Dictionary<string,byte[]> Files=new Dictionary<string,byte[]>(StringComparer.OrdinalIgnoreCase);
@@ -54,7 +56,7 @@ namespace CoveQoLTrainer {
     }
   }
   internal static class Bootstrap {
-    internal const string GameHash="86a0430db6bcba963a97a36b5d9e4bc0366989e65ff8ce6735e0cfe0aec42f32";
+    internal const string GameHash="5e43b0a0411141fccf45b2c7f85c58f83cd2be9b5a50feb379d0a9e2b8470ab4";
     internal static readonly string[] PayloadNames={"dwmapi.dll","ue4ss/UE4SS.dll","ue4ss/UE4SS-settings.ini","ue4ss/LICENSE","ue4ss/Mods/CoveQoLTrainer/Scripts/main.lua","ue4ss/Mods/CoveQoLTrainer/Scripts/WarehouseUI.lua","ue4ss/Mods/CoveQoLTrainer/Scripts/CoveQoLNative.dll","msvcp140.dll","msvcp140_1.dll","msvcp140_2.dll","msvcp140_atomic_wait.dll","msvcp140_codecvt_ids.dll","vcruntime140.dll","vcruntime140_1.dll","concrt140.dll"};
     internal static string Hash(string path){using(var stream=File.OpenRead(path))using(var hash=SHA256.Create())return BitConverter.ToString(hash.ComputeHash(stream)).Replace("-","").ToLowerInvariant();}
     internal static string Hash(byte[] data){using(var hash=SHA256.Create())return BitConverter.ToString(hash.ComputeHash(data)).Replace("-","").ToLowerInvariant();}
@@ -110,9 +112,22 @@ namespace CoveQoLTrainer {
     internal static SetupPlan Plan(string bin,string data,Dictionary<string,byte[]> payload) {
       var plan=new SetupPlan();
       string ue=SafeTarget(bin,"ue4ss/UE4SS.dll"),loader=SafeTarget(bin,"dwmapi.dll");
-      if((File.Exists(ue)&&Hash(ue)!=Hash(payload["ue4ss/UE4SS.dll"]))||(File.Exists(loader)&&Hash(loader)!=Hash(payload["dwmapi.dll"])))throw new SetupException("loaderConflict");
+      if(File.Exists(ue)&&Hash(ue)!=Hash(payload["ue4ss/UE4SS.dll"]))throw new SetupException("loaderConflict",ue);
+      if(File.Exists(loader)&&Hash(loader)!=Hash(payload["dwmapi.dll"]))throw new SetupException("loaderConflict",loader);
       string ini=SafeTarget(bin,"ue4ss/UE4SS-settings.ini");
-      if(File.Exists(ini)&&Regex.IsMatch(File.ReadAllText(ini),@"(?mi)^[ \t]*(ModsFolderPath|ControllingModsTxt)[ \t]*=[ \t]*[^\s;\r\n]"))throw new SetupException("loaderConflict");
+      if(File.Exists(ini)) {
+        foreach(string line in File.ReadLines(ini)) {
+          var setting=Regex.Match(line,@"^\s*(ModsFolderPath|ControllingModsTxt)\s*=(.*)$",RegexOptions.IgnoreCase);
+          if(!setting.Success)continue;
+          string value=setting.Groups[2].Value.Trim().Replace('/','\\');
+          if(value.Length==0||value.StartsWith(";"))continue;
+          bool directory=string.Equals(setting.Groups[1].Value,"ModsFolderPath",StringComparison.OrdinalIgnoreCase);
+          string expected=SafeTarget(bin,directory?"ue4ss/Mods":"ue4ss/Mods/mods.txt");
+          if(directory)value=value.TrimEnd('\\');
+          if(!string.Equals(value,expected,StringComparison.OrdinalIgnoreCase))
+            throw new SetupException("loaderConflict",ini+"\n"+line.Trim());
+        }
+      }
       foreach(var item in payload) {
         string target=SafeTarget(bin,item.Key);
         if(item.Key=="ue4ss/UE4SS-settings.ini"&&File.Exists(target))continue;
@@ -184,7 +199,7 @@ namespace CoveQoLTrainer {
           }catch(Exception ex){MessageBox.Show(lang["elevation"]+"\n"+ex.Message,"Cove QoL Trainer");return false;}
         }
         catch(Exception ex) {
-          var reason=ex as SetupException;string message=reason==null?lang["installError"]+"\n"+ex.Message:lang[reason.Key];
+          var reason=ex as SetupException;string message=reason==null?lang["installError"]+"\n"+ex.Message:reason.Localized(lang);
           if(MessageBox.Show(message,"Cove QoL Trainer",MessageBoxButtons.RetryCancel,MessageBoxIcon.Warning)!=DialogResult.Retry)return false;
         }
       }
@@ -194,7 +209,7 @@ namespace CoveQoLTrainer {
     internal static int Elevated(string[] args) {
       if(args.Length!=3)return 2;
       var lang=new Localization(Localization.Detect(args[1]));
-      try{Install(args[1],args[2]);return 0;}catch(Exception ex){var reason=ex as SetupException;MessageBox.Show(reason==null?lang["installError"]+"\n"+ex.Message:lang[reason.Key],"Cove QoL Trainer");return 1;}
+      try{Install(args[1],args[2]);return 0;}catch(Exception ex){var reason=ex as SetupException;MessageBox.Show(reason==null?lang["installError"]+"\n"+ex.Message:reason.Localized(lang),"Cove QoL Trainer");return 1;}
     }
   }
 }

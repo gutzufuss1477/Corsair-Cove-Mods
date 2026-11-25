@@ -64,7 +64,7 @@ extern "C" {
     void *fogKeepResume=nullptr,*fogTransitionResume=nullptr;
     void FogKeepHook();void FogTransitionHook();
 }
-using CampRangeFn=bool(*)(void*,void*,void*);
+using CampRangeFn=bool(*)(void*,const void*);
 static CampRangeFn campRangeOriginal=nullptr;
 static bool attempted=false,ready=false;
 static std::string error="NotInitialized",revision;
@@ -93,10 +93,9 @@ extern "C" void RefreshAttackPoints(void* model) {
     attackRefresh.Update(model,updateAttackCamps,updateAttackTowers);
 }
 
-// Only the pirate-camp placement proximity helper. Its third argument is the
-// placer; forwarding just the first two arguments would corrupt the calculation.
-static bool CampRangeHook(void* campData,void* model,void* placer) {
-    const bool conflict=campRangeOriginal(campData,model,placer);
+// Patch 8 passes the model and placement coordinates to the camp distance check.
+static bool CampRangeHook(void* model,const void* placementXY) {
+    const bool conflict=campRangeOriginal(model,placementXY);
     InterlockedIncrement64(&campOverlapChecks);
     if(conflict && campOverlapEnabled) {
         InterlockedIncrement64(&campOverlapBypasses);
@@ -125,7 +124,7 @@ static std::string Sha256(const wchar_t* path) {
 }
 static void Status() {
     std::ofstream out(folder+L"native-status.ini.tmp",std::ios::trunc);
-    out<<"Version=1.2.5\nReady="<<(ready?1:0)<<"\nError="<<error<<"\nRevision="<<revision
+    out<<"Version=1.2.6\nReady="<<(ready?1:0)<<"\nError="<<error<<"\nRevision="<<revision
        <<"\nWarehouseTypes="<<warehouseState.types<<"\nWarehouseBaseSlots="<<warehouseState.baseSlots
        <<"\nWarehouseAssetAddress="<<warehouseState.assetAddress<<"\nWarehouseChanges="<<warehouseState.changes
        <<"\nWarehouseCount="<<warehouseState.warehouses<<"\nWarehousePending="<<(warehouseState.pending?1:0)
@@ -184,7 +183,7 @@ static void Initialize() {
     if(!GetEnvironmentVariableW(L"LOCALAPPDATA",local,32768)) {error="NoDataDirectory";return;}
     folder=std::wstring(local)+L"\\CorsairCoveQoL\\";CreateDirectoryW(folder.c_str(),nullptr);
     if(!GetModuleFileNameW(nullptr,exe,32768) ||
-       Sha256(exe)!="86a0430db6bcba963a97a36b5d9e4bc0366989e65ff8ce6735e0cfe0aec42f32") {
+       Sha256(exe)!="5e43b0a0411141fccf45b2c7f85c58f83cd2be9b5a50feb379d0a9e2b8470ab4") {
         error="UnsupportedGameBuild";return;
     }
     // Never let a Lua reload unload executable code while a hook points into it.
@@ -205,88 +204,88 @@ static void Initialize() {
     Hook hooks[]={
         // Only the identified housing tooltip needs beds instead of the stock
         // population count. Other callers retain the original population API.
-        {0x5def7a0,"48896c241848897c242041564883ec20",reinterpret_cast<void*>(&HousingPopulationHook),reinterpret_cast<void**>(&housingPopulationOriginal),0},
-        {0x5db0856,"488b8a0803000003394883c310483bde7598",reinterpret_cast<void*>(&CampHousingHook),&unusedHousing,7},
-        {0x5db0916,"488b8a0803000003394883c310483bde7598",reinterpret_cast<void*>(&CampHousingPendingHook),&unusedPendingHousing,7},
-        {0x5ceb3f0,"48895c240848896c24104889742418574883ec20",reinterpret_cast<void*>(&BattleStatHook),reinterpret_cast<void**>(&battleStatOriginal),0},
-        {0x5cee200,"48895c240848896c241048897424185741564157",reinterpret_cast<void*>(&BattleSupplyHook),reinterpret_cast<void**>(&battleSupplyOriginal),0},
+        {0x5df98f0,"48896c241848897c242041564883ec20",reinterpret_cast<void*>(&HousingPopulationHook),reinterpret_cast<void**>(&housingPopulationOriginal),0},
+        {0x5d96f56,"488b8ac802000003394883c310483bde7598",reinterpret_cast<void*>(&CampHousingHook),&unusedHousing,7},
+        {0x5d97016,"488b8ac802000003394883c310483bde7598",reinterpret_cast<void*>(&CampHousingPendingHook),&unusedPendingHousing,7},
+        {0x5cca250,"48895c240848896c24104889742418574883ec20",reinterpret_cast<void*>(&BattleStatHook),reinterpret_cast<void**>(&battleStatOriginal),0},
+        {0x5ccdd90,"48895c240848896c2410488974241848897c2420",reinterpret_cast<void*>(&BattleSupplyHook),reinterpret_cast<void**>(&battleSupplyOriginal),0},
         // Final effective speed returned to sailing, path and travel-time code.
         // Covers cached/live ships, original modifiers are already included.
-        {0x5d61947,"0f28c6488b4c24304833cce8",reinterpret_cast<void*>(&ShipSpeedHook),&unusedShip,8},
-        {0x5d04dbd,"f30f104b08488d4b50",reinterpret_cast<void*>(&StepHook),&unusedStep,5},
-        {0x5cfda79,"f30f1043080f5ac0",reinterpret_cast<void*>(&DurationHook),&unusedDuration,5},
-        {0x5cff4b2,"f30f104b08f20f1015",reinterpret_cast<void*>(&RemainingHook),&unusedRemaining,5},
+        {0x5d6dc27,"0f28c6488b4c24304833cce8",reinterpret_cast<void*>(&ShipSpeedHook),&unusedShip,8},
+        {0x5d14a9d,"f30f104b08488d4b50",reinterpret_cast<void*>(&StepHook),&unusedStep,5},
+        {0x5d0d329,"f30f1043080f5ac0",reinterpret_cast<void*>(&DurationHook),&unusedDuration,5},
+        {0x5d0fa82,"f30f104b08f20f1015",reinterpret_cast<void*>(&RemainingHook),&unusedRemaining,5},
         // Carrier view controller: movement input and remaining-time transition.
         // The old 5cf941a hook was a different path-following implementation.
-        {0x5ad93ac,"f30f104b084d8bcef20f1003",reinterpret_cast<void*>(&VisualHook),&unusedVisual,5},
-        {0x5ad9420,"f30f104b08f30f1015f3ee9502",reinterpret_cast<void*>(&VisualTimeHook),&unusedVisualTime,5},
+        {0x5ade8ac,"f30f104b084d8bcef20f1003",reinterpret_cast<void*>(&VisualHook),&unusedVisual,5},
+        {0x5ade920,"f30f104b08f30f1015f3529602",reinterpret_cast<void*>(&VisualTimeHook),&unusedVisualTime,5},
         // Both movement-speed getters choose by path connection type, with an
         // optional per-agent override. Scale their final read for MT_Worker.
         // Changing only ConnectionConfigs[0] misses roads/other connection types.
-        {0x5ab02af,"f20f1004c3488b5c24404883c430",reinterpret_cast<void*>(&LocomotionDefaultHook),&unusedLocomotionDefault,5},
-        {0x5ab02d9,"f20f1000488b5c24404883c430",reinterpret_cast<void*>(&LocomotionOverrideHook),&unusedLocomotionOverride,9},
-        {0x5ab0d22,"f20f1004c3488b5c24484883c430",reinterpret_cast<void*>(&LocomotionIndexedDefaultHook),&unusedLocomotionIndexedDefault,5},
-        {0x5ab0d4c,"f20f1000488b5c24484883c430",reinterpret_cast<void*>(&LocomotionIndexedOverrideHook),&unusedLocomotionIndexedOverride,9},
+        {0x5ab58cf,"f20f1004c3488b5c24404883c430",reinterpret_cast<void*>(&LocomotionDefaultHook),&unusedLocomotionDefault,5},
+        {0x5ab58f9,"f20f1000488b5c24404883c430",reinterpret_cast<void*>(&LocomotionOverrideHook),&unusedLocomotionOverride,9},
+        {0x5ab6342,"f20f1004c3488b5c24484883c430",reinterpret_cast<void*>(&LocomotionIndexedDefaultHook),&unusedLocomotionIndexedDefault,5},
+        {0x5ab636c,"f20f1000488b5c24484883c430",reinterpret_cast<void*>(&LocomotionIndexedOverrideHook),&unusedLocomotionIndexedOverride,9},
         // Travel estimates read the global base speed directly. Cached path
         // creation/load remain vanilla so these read hooks never double-scale.
-        {0x5b4f23e,"f30f108000030000488d459f",reinterpret_cast<void*>(&TransportPlanHook),&unusedPlan,8},
-        {0x5b6edc1,"f30f108b000300004d8d466c",reinterpret_cast<void*>(&TransportArrivalHook),&unusedArrival,8},
-        {0x5b75a3e,"f30f108e000300004c8d8e78020000",reinterpret_cast<void*>(&TransportRouteHook),&unusedRoute,8},
-        {0x5b75d9c,"f30f1088000300004c8d8878020000",reinterpret_cast<void*>(&TransportRouteAltHook),&unusedRouteAlt,8},
+        {0x5b5684e,"f30f108000030000488d459f",reinterpret_cast<void*>(&TransportPlanHook),&unusedPlan,8},
+        {0x5b78f11,"f30f108b000300004d8d466c",reinterpret_cast<void*>(&TransportArrivalHook),&unusedArrival,8},
+        {0x5b800ae,"f30f108e000300004c8d8e78020000",reinterpret_cast<void*>(&TransportRouteHook),&unusedRoute,8},
+        {0x5b8040c,"f30f1088000300004c8d8878020000",reinterpret_cast<void*>(&TransportRouteAltHook),&unusedRouteAlt,8},
         // XMM6 already holds worker contribution / construction duration. Scale
         // before the original delta-time multiplication and resource progress cap.
-        {0x5c8ee84,"f3410f107f08f30f59f04885d2",reinterpret_cast<void*>(&ConstructionHook),&unusedConstruction,6},
-        {0x5d36ce0,"48895c2408574883ec700f29742460",reinterpret_cast<void*>(&CampRangeHook),reinterpret_cast<void**>(&campRangeOriginal),0},
+        {0x5c98014,"f3410f107f08f30f59f04885d2",reinterpret_cast<void*>(&ConstructionHook),&unusedConstruction,6},
+        {0x5d47400,"48895c24104889742418574883ec40",reinterpret_cast<void*>(&CampRangeHook),reinterpret_cast<void**>(&campRangeOriginal),0},
         // Second overlap rejection: continue through the original reference
         // release and required-structure checks, never return blanket success.
-        {0x5d27b04,"41f60101744a41c60717",reinterpret_cast<void*>(&CampGateHook),&unusedCampGate,6},
-        {0x5b834d4,"0f2fc877528b47083b4500",reinterpret_cast<void*>(&NearestCoastHook),&unusedNearestCoast,5},
+        {0x5d357f2,"41f60201744041c60717",reinterpret_cast<void*>(&CampGateHook),&unusedCampGate,6},
+        {0x5b8ca24,"0f2fd077528b47083b4500",reinterpret_cast<void*>(&NearestCoastHook),&unusedNearestCoast,5},
         // FCFortification_HandleIdleWaitAttacks receives the current CModel.
         // The assembly entry wrapper preserves every volatile argument/register.
-        {0x5b914c0,"405556488dac2438ffffff4881ecc8010000",reinterpret_cast<void*>(&AttackTickHook),&attackTickOriginal,0},
+        {0x5b9a610,"405556488dac2438ffffff4881ecc8010000",reinterpret_cast<void*>(&AttackTickHook),&attackTickOriginal,0},
         // bKeepDiscovered read in the Caribbean region cover-timer controller.
         // Override only the read: original region/save/asset flag is untouched.
-        {0x5ab9085,"440fb67058498bcde81e890300",reinterpret_cast<void*>(&FogKeepHook),&unusedFogKeep,5},
+        {0x5abe6a5,"440fb67058498bcde87e900300",reinterpret_cast<void*>(&FogKeepHook),&unusedFogKeep,5},
         // Existing visible -> hidden requests become the original unchanged path.
         // This also catches an already expired timer or a queued cover request.
-        {0x5ab9678,"3882900000000f8482020000",reinterpret_cast<void*>(&FogTransitionHook),&unusedFogTransition,6}
+        {0x5abec98,"3882900000000f8482020000",reinterpret_cast<void*>(&FogTransitionHook),&unusedFogTransition,6}
     };
     for(auto& h:hooks)if(!Fingerprint(base+h.rva,h.bytes)){error="CodeMismatch";return;}
-    if(!Fingerprint(base+0x5b83360,"48895c242055574155415641574883ec70")||
-       !Fingerprint(base+0x5b83040,"40555356415441554157488dac24e8feffff")) {error="AttackRefreshCodeMismatch";return;}
-    if(!Fingerprint(base+0x5cddd30,"48895c241848896c2420565741564883ec20") ||
-       !Fingerprint(base+0x5cdd260,"4c8bdc415641574883ec68") ||
-       !Fingerprint(base+0x5affa90,"40534883ec20488bd9e8a29a1a003c02")) {error="BattleHelperCodeMismatch";return;}
-    if(!Fingerprint(base+0x5dbd240,"40574883ec30488b82e8020000488bf9")){error="CampRadiusCodeMismatch";return;}
-    if(!Fingerprint(base+0x5e5e3d0,"4883ec284885c9750733c04883c428c3")||
-       !Fingerprint(base+0x5c84490,"4883b9c801000000751b")||
-       !Fingerprint(base+0x5c84470,"488b81d80100004885c0740c")){error="HousingTooltipCodeMismatch";return;}
-    housingTooltip.modelForWorld=reinterpret_cast<HousingModelFn>(base+0x5e5e3d0);
-    if(!Fingerprint(base+0x169f4e0,"448b49044585c974448b0185c0783e")){error="WarehouseHelperCodeMismatch";return;}
-    warehouseState.resolveAsset=reinterpret_cast<WarehouseResolveFn>(base+0x169f4e0);
-    housingTooltip.operational=reinterpret_cast<HousingEligibilityFn>(base+0x5c84490);
-    housingTooltip.excluded=reinterpret_cast<HousingEligibilityFn>(base+0x5c84470);
-    setCampRadius=reinterpret_cast<SetCampRadiusFn>(base+0x5dbd240);
-    battleStatSource=reinterpret_cast<BattleTagFn>(base+0x5cddd30);
-    battleStatType=reinterpret_cast<BattleTagFn>(base+0x5cdd260);
-    battleEncounterActive=reinterpret_cast<BattleEncounterFn>(base+0x5affa90);
+    if(!Fingerprint(base+0x5b8c8e0,"48895c241855574155415641574883ec60")||
+       !Fingerprint(base+0x5b8c5c0,"40555356415441554157488dac24e8feffff")) {error="AttackRefreshCodeMismatch";return;}
+    if(!Fingerprint(base+0x5cbb970,"48895c241848896c2420565741564883ec20") ||
+       !Fingerprint(base+0x5cbb030,"4c8bdc415641574883ec68") ||
+       !Fingerprint(base+0x5b05b50,"40534883ec20488bd9e852331b003c02")) {error="BattleHelperCodeMismatch";return;}
+    if(!Fingerprint(base+0x5da7b50,"40574883ec30488b82a8020000488bf9")){error="CampRadiusCodeMismatch";return;}
+    if(!Fingerprint(base+0x5e69cc0,"4883ec284885c9750733c04883c428c3")||
+       !Fingerprint(base+0x5c8d530,"4883b98801000000751b")||
+       !Fingerprint(base+0x5c8d510,"488b81980100004885c0740c")){error="HousingTooltipCodeMismatch";return;}
+    housingTooltip.modelForWorld=reinterpret_cast<HousingModelFn>(base+0x5e69cc0);
+    if(!Fingerprint(base+0x16a22d0,"448b49044585c974448b0185c0783e")){error="WarehouseHelperCodeMismatch";return;}
+    warehouseState.resolveAsset=reinterpret_cast<WarehouseResolveFn>(base+0x16a22d0);
+    housingTooltip.operational=reinterpret_cast<HousingEligibilityFn>(base+0x5c8d530);
+    housingTooltip.excluded=reinterpret_cast<HousingEligibilityFn>(base+0x5c8d510);
+    setCampRadius=reinterpret_cast<SetCampRadiusFn>(base+0x5da7b50);
+    battleStatSource=reinterpret_cast<BattleTagFn>(base+0x5cbb970);
+    battleStatType=reinterpret_cast<BattleTagFn>(base+0x5cbb030);
+    battleEncounterActive=reinterpret_cast<BattleEncounterFn>(base+0x5b05b50);
     const auto init=MH_Initialize();
     if(init!=MH_OK && init!=MH_ERROR_ALREADY_INITIALIZED){error="HookInitFailed";return;}
-    stepResume=base+0x5d04dc2;durationResume=base+0x5cfda7e;
-    shipResume=base+0x5d6194f;
-    campHousingResume=base+0x5db0863;
-    campHousingPendingResume=base+0x5db0923;
-    remainingResume=base+0x5cff4b7;visualResume=base+0x5ad93b1;visualTimeResume=base+0x5ad9425;
-    planResume=base+0x5b4f246;arrivalResume=base+0x5b6edc9;
-    routeResume=base+0x5b75a46;routeAltResume=base+0x5b75da4;
-    locomotionDefaultResume=base+0x5ab02b4;locomotionOverrideResume=base+0x5ab02e2;
-    locomotionIndexedDefaultResume=base+0x5ab0d27;locomotionIndexedOverrideResume=base+0x5ab0d55;
-    constructionResume=base+0x5c8ee8a;
-    campGateContinue=base+0x5d27b54;campGateReject=base+0x5d27b0a;
-    nearestCoastAccept=base+0x5b834d9;nearestCoastReject=base+0x5b8352b;
-    fogKeepResume=base+0x5ab908a;fogTransitionResume=base+0x5ab967e;
-    updateAttackCamps=reinterpret_cast<AttackPointFn>(base+0x5b83360);
-    updateAttackTowers=reinterpret_cast<AttackPointFn>(base+0x5b83040);
+    stepResume=base+0x5d14aa2;durationResume=base+0x5d0d32e;
+    shipResume=base+0x5d6dc2f;
+    campHousingResume=base+0x5d96f63;
+    campHousingPendingResume=base+0x5d97023;
+    remainingResume=base+0x5d0fa87;visualResume=base+0x5ade8b1;visualTimeResume=base+0x5ade925;
+    planResume=base+0x5b56856;arrivalResume=base+0x5b78f19;
+    routeResume=base+0x5b800b6;routeAltResume=base+0x5b80414;
+    locomotionDefaultResume=base+0x5ab58d4;locomotionOverrideResume=base+0x5ab5902;
+    locomotionIndexedDefaultResume=base+0x5ab6347;locomotionIndexedOverrideResume=base+0x5ab6375;
+    constructionResume=base+0x5c9801a;
+    campGateContinue=base+0x5d35838;campGateReject=base+0x5d357f8;
+    nearestCoastAccept=base+0x5b8ca29;nearestCoastReject=base+0x5b8ca7b;
+    fogKeepResume=base+0x5abe6aa;fogTransitionResume=base+0x5abec9e;
+    updateAttackCamps=reinterpret_cast<AttackPointFn>(base+0x5b8c8e0);
+    updateAttackTowers=reinterpret_cast<AttackPointFn>(base+0x5b8c5c0);
     for(auto& h:hooks) {
         auto result=MH_CreateHook(base+h.rva,h.replacement,h.original);
         if(result!=MH_OK){error=std::string("CreateHook:")+MH_StatusToString(result);goto failed;}

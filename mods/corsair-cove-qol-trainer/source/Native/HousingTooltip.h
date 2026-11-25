@@ -15,12 +15,12 @@ static void* HousingHandle(const void* handle) {
 static bool HousingCampContribution(void* model,unsigned long steps,
     HousingEligibilityFn operational,HousingEligibilityFn excluded,int& result) {
     if(!model||!operational||!excluded||steps<10||steps>1000)return false;
-    auto selected=HousingHandle(static_cast<unsigned char*>(model)+0x20b8);
+    auto selected=HousingHandle(static_cast<unsigned char*>(model)+0x2110);
     if(!selected)return false;
-    auto link=AttackRead<unsigned char*>(selected,0x2f8);
+    auto link=AttackRead<unsigned char*>(selected,0x2b8);
     auto camp=link?HousingHandle(link+0x10):selected;
     if(!camp)return false;
-    auto data=AttackRead<unsigned char*>(camp,0x2e8);
+    auto data=AttackRead<unsigned char*>(camp,0x2a8);
     if(!data)return false;
     result=0;
     if(!AttackRead<void*>(data,0x190))return true; // same empty WorkerPool gate
@@ -31,8 +31,8 @@ static bool HousingCampContribution(void* model,unsigned long steps,
     for(int i=0;i<count;++i) {
         auto structure=HousingHandle(houses+i*16);
         if(!structure)continue;
-        auto house=AttackRead<const int*>(structure,0x308);
-        if(!house||!AttackRead<void*>(structure,0x2e8))continue;
+        auto house=AttackRead<const int*>(structure,0x2c8);
+        if(!house||!AttackRead<void*>(structure,0x2a8))continue;
         if(!operational(structure)||excluded(structure))continue;
         // Use current base/bonuses; never a cached value or hardcoded25.
         if(*house<0)return false; // unrecognised sentinel: preserve vanilla UI

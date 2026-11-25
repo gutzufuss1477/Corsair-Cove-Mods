@@ -63,10 +63,10 @@ ScaleCampHousing MACRO resume
     LOCAL housingOriginal,housingNext
     ; Hook the seven-byte pointer load, not the following ADD pair: the game's
     ; eligibility branches jump directly to the iterator ADD and must stay valid.
-    mov rcx,QWORD PTR [rdx+308h]
+    mov rcx,QWORD PTR [rdx+2c8h]
     cmp DWORD PTR [campHousingSteps],10
     je housingOriginal
-    cmp QWORD PTR [rdx+2e8h],0
+    cmp QWORD PTR [rdx+2a8h],0
     je housingOriginal
     cmp DWORD PTR [rcx],0
     jle housingOriginal
@@ -245,21 +245,21 @@ CampGateHook PROC
     lock inc QWORD PTR [campOverlapChecks]
     cmp DWORD PTR [campOverlapEnabled],0
     je ReplayCampGate
-    test BYTE PTR [r9],1
+    test BYTE PTR [r10],1
     jz ReplayCampGate
     lock inc QWORD PTR [campOverlapBypasses]
     popfq
     jmp QWORD PTR [campGateContinue]
 ReplayCampGate:
     popfq
-    test BYTE PTR [r9],1
+    test BYTE PTR [r10],1
     jz ContinueCampGate
     jmp QWORD PTR [campGateReject]
 ContinueCampGate:
     jmp QWORD PTR [campGateContinue]
 CampGateHook ENDP
-; Mid-function gate replaces COMISS XMM1,XMM0 / JA skip. At this audited
-; site RSP is 16-byte aligned, R15=model, R13=point, RCX=selected camp XY.
+; Mid-function gate replaces COMISS XMM2,XMM0 / JA skip. At this audited
+; site RSP is 16-byte aligned, R15=model, R13=point, [original RSP+30h]=camp XY.
 ; Preserve every volatile register and all six SSE registers across the helper.
 ; Original camp eligibility, handle ownership and tower calculations stay intact.
 NearestCoastHook PROC FRAME
@@ -284,7 +284,7 @@ NearestCoastHook PROC FRAME
     movaps XMMWORD PTR [rsp+90h],xmm3
     movaps XMMWORD PTR [rsp+0a0h],xmm4
     movaps XMMWORD PTR [rsp+0b0h],xmm5
-    mov r8,rcx
+    lea r8,[rsp+0f0h] ; original RSP + 30h holds camp XY
     mov rcx,r15
     mov rdx,r13
     call SelectNearestCoast
@@ -309,7 +309,7 @@ NearestCoastHook PROC FRAME
 NearestCoastOriginal:
     popfq
     lea rsp,[rsp+0c0h]
-    comiss xmm1,xmm0
+    comiss xmm2,xmm0
     ja NearestCoastSkip
     jmp QWORD PTR [nearestCoastAccept]
 NearestCoastSkip:

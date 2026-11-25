@@ -13,10 +13,10 @@ struct CampRadiusState {
     void Configure(float value) {if(!configured||factor!=value)pending=true;factor=value;configured=true;}
     void Update(void* model,SetCampRadiusFn setRadius) {
         if(!configured||!model||!setRadius)return;
-        auto list=AttackRead<unsigned char*>(model,0x18b0);
-        int count=AttackRead<int>(model,0x18b8);
-        auto coast=AttackRead<unsigned char*>(model,0x3c20);
-        int points=AttackRead<int>(model,0x3c28);
+        auto list=AttackRead<unsigned char*>(model,0x1908);
+        int count=AttackRead<int>(model,0x1910);
+        auto coast=AttackRead<unsigned char*>(model,0x3c90);
+        int points=AttackRead<int>(model,0x3c98);
         invalid=count<0||count>4096||(count&&!list)||points<0||points>8192||(points&&!coast);
         if(invalid)return;
         for(int i=0;i<points;++i) {
@@ -28,7 +28,7 @@ struct CampRadiusState {
             auto camp=AttackRead<void*>(list,i*16);
             auto control=AttackRead<unsigned char*>(list,i*16+8);
             if(!camp||!control||!(control[0]&1)){invalid=true;return;}
-            auto data=AttackRead<void*>(camp,0x2e8);
+            auto data=AttackRead<void*>(camp,0x2a8);
             if(!data){invalid=true;return;}
             float base=AttackRead<float>(data,0x328),current=AttackRead<float>(data,0x32c);
             if(!std::isfinite(base)||!std::isfinite(current)||base<=0||current<=0||base>2000000||current>3000000){invalid=true;return;}
@@ -36,7 +36,7 @@ struct CampRadiusState {
         const float target=3000.0f*factor;
         for(int i=0;i<count;++i) {
             auto camp=AttackRead<void*>(list,i*16);
-            auto data=AttackRead<void*>(camp,0x2e8);
+            auto data=AttackRead<void*>(camp,0x2a8);
             float base=AttackRead<float>(data,0x328);
             if(std::abs(base-target)<0.01f)continue;
             float current=AttackRead<float>(data,0x32c);

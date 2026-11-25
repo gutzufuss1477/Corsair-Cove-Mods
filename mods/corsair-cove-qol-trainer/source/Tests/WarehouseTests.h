@@ -10,10 +10,10 @@ static void RunWarehouseTests(){
     struct Handle{void* object;unsigned char* control;};
     std::array<Handle,3> list{{{building.data(),&alive},{other.data(),&alive},{dead.data(),&notAlive}}};
     auto put=[](auto& a,size_t at,auto value){std::memcpy(a.data()+at,&value,sizeof(value));};
-    put(model,0x17b0,list.data());put(model,0x17b8,3);put(model,0x20b8,list[0]);
-    put(building,0x118,reinterpret_cast<void*>(0x8000));put(other,0x118,reinterpret_cast<void*>(0x9000));
-    put(building,0x268,data.data());put(building,0x540,Handle{storage.data(),&alive});
-    put(other,0x268,otherData.data());put(other,0x540,Handle{otherStorage.data(),&alive});
+    put(model,0x1808,list.data());put(model,0x1810,3);put(model,0x2110,list[0]);
+    put(building,0xd8,reinterpret_cast<void*>(0x8000));put(other,0xd8,reinterpret_cast<void*>(0x9000));
+    put(building,0x228,data.data());put(building,0x4f0,Handle{storage.data(),&alive});
+    put(other,0x228,otherData.data());put(other,0x4f0,Handle{otherStorage.data(),&alive});
     put(data,0,15);put(data,4,5);put(otherData,0,15);put(otherData,4,5);
     put(storage,0x28,entries.data());put(storage,0x30,9);put(storage,0,15);storage[4]=1;
     put(otherStorage,0,15);otherStorage[4]=1;
@@ -44,10 +44,10 @@ static void RunWarehouseTests(){
     Require(AttackRead<int>(data.data(),0)==63,"Actual initial allocation determines enlarged capacity");
     for(int bad:{0,-1,101}){put(data,4,bad);auto before=storage;state.Update(model.data());Require(state.invalid&&state.pending&&storage==before,"Malformed allocations fail without storage writes");}
     put(data,4,5);storage[4]=0;auto before=storage;state.Update(model.data());Require(state.invalid&&storage==before,"Unlimited or absent storage capacity is never reinterpreted as a finite slot limit");
-    storage[4]=1;put(model,0x20b8,list[1]);state.Update(model.data());Require(!state.selected&&state.selectedResources==0,"Selecting another building clears warehouse UI context");
-    put(model,0x17b8,65537);before=storage;state.Update(model.data());Require(state.invalid&&storage==before,"Malformed structure arrays are rejected before iteration");
-    put(model,0x17b8,0);state.Update(model.data());Require(!state.invalid&&state.warehouses==0,"Empty maps require no special warehouses");
-    put(model,0x17b8,3);state.Configure(6,15,0);before=storage;state.Update(model.data());Require(state.pending&&storage==before,"Unloaded exact asset keeps configuration pending without writes");
+    storage[4]=1;put(model,0x2110,list[1]);state.Update(model.data());Require(!state.selected&&state.selectedResources==0,"Selecting another building clears warehouse UI context");
+    put(model,0x1810,65537);before=storage;state.Update(model.data());Require(state.invalid&&storage==before,"Malformed structure arrays are rejected before iteration");
+    put(model,0x1810,0);state.Update(model.data());Require(!state.invalid&&state.warehouses==0,"Empty maps require no special warehouses");
+    put(model,0x1810,3);state.Configure(6,15,0);before=storage;state.Update(model.data());Require(state.pending&&storage==before,"Unloaded exact asset keeps configuration pending without writes");
 
     // The updated game's getter selects a live override before its primary.
     // Poison obsolete fields so the fixture detects old-layout accesses.
@@ -55,8 +55,8 @@ static void RunWarehouseTests(){
     std::array<unsigned char,0x80> overrideStorage{};
     unsigned char overrideAlive=1,secondControl=1;
     put(overrideStorage,0,18);overrideStorage[4]=1;put(overrideStorage,0x30,4);
-    put(building,0x550,Handle{overrideStorage.data(),&overrideAlive});
-    put(model,0x20b8,list[0]);put(data,0,15);put(storage,0,15);
+    put(building,0x500,Handle{overrideStorage.data(),&overrideAlive});
+    put(model,0x2110,list[0]);put(data,0,15);put(storage,0,15);
     WarehouseState fresh;fresh.resolveAsset=&WarehouseFakeResolve;fresh.Configure(9,15,0x8000);
     const auto primaryBefore=storage;fresh.Update(model.data());
     Require(!fresh.invalid&&fresh.selectedResources==4&&AttackRead<int>(overrideStorage.data(),0)==45,
@@ -72,11 +72,11 @@ static void RunWarehouseTests(){
     fresh.Configure(3,15,0x8000);fresh.Update(model.data());
     // A recycled storage address with a new control block is a new identity.
     fresh.Configure(9,15,0x8000);fresh.Update(model.data());
-    put(building,0x540,Handle{storage.data(),&secondControl});put(data,0,21);put(storage,0,22);
+    put(building,0x4f0,Handle{storage.data(),&secondControl});put(data,0,21);put(storage,0,22);
     fresh.Update(model.data());fresh.Configure(3,15,0x8000);fresh.Update(model.data());
     Require(AttackRead<int>(data.data(),0)==21&&AttackRead<int>(storage.data(),0)==22,
         "Recycled storage pointer cannot restore an old object's capacity baseline");
-    put(building,0x540,Handle{reinterpret_cast<void*>(1),&notAlive});
+    put(building,0x4f0,Handle{reinterpret_cast<void*>(1),&notAlive});
     before=storage;fresh.Configure(9,15,0x8000);fresh.Update(model.data());
     Require(fresh.invalid&&fresh.pending&&storage==before,"No valid current storage fails closed without dereference or writes");
 }

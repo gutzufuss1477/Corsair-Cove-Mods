@@ -5,7 +5,7 @@ extern "C" void GameStepFixture();
 extern "C" float TestPatchedStep(float);
 extern "C" void GameConstructionFixture();
 extern "C" float TestPatchedConstruction(float,float,float,float);
-extern "C" bool GameCampRangeFixture(void*,void*,void*);
+extern "C" bool GameCampRangeFixture(void*,const void*);
 extern "C" void GameCampGateFixture();
 extern "C" bool TestPatchedCampGate(void*,unsigned char*,int);
 static int checks=0;
@@ -70,24 +70,24 @@ int main() {
             "Disabled construction factor exactly matches unpatched calculation");
         MH_RemoveHook(buildingFixture);
         auto campFixture=reinterpret_cast<unsigned char*>(&GameCampRangeFixture);
-        Require(Fingerprint(campFixture,"48895c2408574883ec700f29742460"),"Camp range fixture matches audited prologue");
+        Require(Fingerprint(campFixture,"48895c24104889742418574883ec40"),"Camp range fixture matches audited prologue");
         Require(MH_CreateHook(campFixture,reinterpret_cast<void*>(&CampRangeHook),reinterpret_cast<void**>(&campRangeOriginal))==MH_OK,
             "Camp proximity trampoline created");
         Require(MH_EnableHook(campFixture)==MH_OK,"Camp proximity hook enabled");
         unsigned char yes=1,no=0;
         campOverlapEnabled=0;
-        Require(GameCampRangeFixture(&yes,&yes,&yes),"Disabled overlap preserves original rejection");
+        Require(GameCampRangeFixture(&yes,&yes),"Disabled overlap preserves original rejection");
         campOverlapEnabled=1;
-        Require(!GameCampRangeFixture(&yes,&yes,&yes),"Enabled overlap bypasses proximity conflict");
+        Require(!GameCampRangeFixture(&yes,&yes),"Enabled overlap bypasses proximity conflict");
         campOverlapEnabled=0;
-        Require(!GameCampRangeFixture(&no,&yes,&yes)&&!GameCampRangeFixture(&yes,&no,&yes)&&!GameCampRangeFixture(&yes,&yes,&no),
-            "All three arguments forwarded through real trampoline; no conflict unchanged");
+        Require(!GameCampRangeFixture(&no,&yes)&&!GameCampRangeFixture(&yes,&no)&&!GameCampRangeFixture(&no,&no),
+            "Model and coordinates forwarded through real trampoline; no conflict unchanged");
         Require(campOverlapChecks==5&&campOverlapBypasses==1,"Camp proximity counters count only actual bypasses");
-        Require(MH_DisableHook(campFixture)==MH_OK&&GameCampRangeFixture(&yes,&yes,&yes),"Unhook restores camp proximity behavior");
+        Require(MH_DisableHook(campFixture)==MH_OK&&GameCampRangeFixture(&yes,&yes),"Unhook restores camp proximity behavior");
         MH_RemoveHook(campFixture);
         auto gateFixture=reinterpret_cast<unsigned char*>(&GameCampGateFixture);
-        Require(Fingerprint(gateFixture,"41f60101744a41c60717"),"Second camp fixture matches both branch and rejection bytes");
-        campGateContinue=gateFixture+0x50;campGateReject=gateFixture+6;
+        Require(Fingerprint(gateFixture,"41f60201744041c60717"),"Second camp fixture matches both branch and rejection bytes");
+        campGateContinue=gateFixture+0x46;campGateReject=gateFixture+6;
         Require(MH_CreateHook(gateFixture,reinterpret_cast<void*>(&CampGateHook),&original)==MH_OK,"Second camp gate hook created");
         Require(MH_EnableHook(gateFixture)==MH_OK,"Second camp gate hook enabled");
         struct Handle {unsigned char live,padding;unsigned short refs;};

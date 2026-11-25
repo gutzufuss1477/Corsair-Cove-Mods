@@ -20,6 +20,14 @@ internal static class SetupTests {
     check(File.ReadAllText(Path.Combine(data,"settings.ini")).Contains("CampRadiusEnabled=0"),"fresh installation enables no range cheat");
     check(!Bootstrap.Plan(bin,data,payload).Needed,"second launch is read-only when setup is current");
     string mods=Path.Combine(bin,"ue4ss","Mods");
+    string config=Path.Combine(bin,"ue4ss","UE4SS-settings.ini");
+    var originalConfig=File.ReadAllBytes(config);
+    File.WriteAllText(config,"[Overrides]\nModsFolderPath = "+mods+"\\\nControllingModsTxt = "+Path.Combine(mods,"mods.txt")+"\n");
+    check(!Bootstrap.Plan(bin,data,payload).Needed,"explicit default mod paths coexist with existing loader settings");
+    File.WriteAllText(config,"[Overrides]\nModsFolderPath = ../Shared\n");
+    rejected=false;try{Bootstrap.Plan(bin,data,payload);}catch(SetupException ex){rejected=ex.Key=="loaderConflict"&&ex.Detail.Contains(config)&&ex.Detail.Contains("ModsFolderPath");}
+    check(rejected,"redirected mod folder is identified before installation");
+    File.WriteAllBytes(config,originalConfig);
     File.WriteAllText(Path.Combine(mods,"mods.txt"),"; preserve my comment\nOtherMod : 1\nExtendedPirateCampRange : 1\nCoveQoLResearch : 1\nKeybinds : 1\n");
     File.WriteAllText(Path.Combine(mods,"mods.json"),"[{\"mod_name\":\"OtherMod\",\"mod_enabled\":true,\"custom\":42},{\"mod_name\":\"ExtendedPirateCampRange\",\"mod_enabled\":true}]");
     string old=Path.Combine(mods,"ExtendedPirateCampRange");Directory.CreateDirectory(Path.Combine(old,"Scripts"));

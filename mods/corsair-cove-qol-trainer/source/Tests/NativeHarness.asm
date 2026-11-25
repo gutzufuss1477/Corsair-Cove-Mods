@@ -27,7 +27,7 @@ GameHousingPopulationFixture ENDP
 ; iterator remains an independent branch destination outside the patched span.
 HousingReadFixture MACRO name
 name PROC
-    mov rcx,QWORD PTR [rdx+308h]
+    mov rcx,QWORD PTR [rdx+2c8h]
     add edi,DWORD PTR [rcx]
     add rbx,10h
     mov DWORD PTR [r8],edi
@@ -297,29 +297,28 @@ TestPatchedConstruction PROC FRAME
 TestPatchedConstruction ENDP
 ; Same audited entry sequence; read all three forwarded arguments.
 GameCampRangeFixture PROC
-    mov QWORD PTR [rsp+8],rbx
+    mov QWORD PTR [rsp+10h],rbx
+    mov QWORD PTR [rsp+18h],rsi
     push rdi
-    sub rsp,70h
-    movaps XMMWORD PTR [rsp+60h],xmm6
-    movzx eax,BYTE PTR [r8]
-    and al,BYTE PTR [rdx]
+    sub rsp,40h
+    movzx eax,BYTE PTR [rdx]
     and al,BYTE PTR [rcx]
-    add rsp,70h
+    add rsp,40h
     pop rdi
     ret
 GameCampRangeFixture ENDP
 ; Exact six-byte gate and status-23 write from the game. Both branches retain
 ; their reference release; the continue branch can still fail a later rule.
 GameCampGateFixture PROC
-    test BYTE PTR [r9],1
+    test BYTE PTR [r10],1
     jz CampFixtureContinue
     mov BYTE PTR [r15],17h
-    dec WORD PTR [r9+2]
+    dec WORD PTR [r10+2]
     xor al,al
     ret
-    DB (50h-($-GameCampGateFixture)) DUP (90h)
+    DB (46h-($-GameCampGateFixture)) DUP (90h)
 CampFixtureContinue:
-    dec WORD PTR [r9+2]
+    dec WORD PTR [r10+2]
     mov BYTE PTR [r15],dl
     test edx,edx
     sete al
@@ -332,7 +331,7 @@ TestPatchedCampGate PROC FRAME
     sub rsp,32
     .allocstack 32
     .endprolog
-    mov r9,rcx
+    mov r10,rcx
     mov r15,rdx
     mov edx,r8d
     call GameCampGateFixture
@@ -348,16 +347,18 @@ TestPatchedNearestCoast PROC FRAME
     .pushreg r13
     push r15
     .pushreg r15
-    sub rsp,40
-    .allocstack 40
+    sub rsp,72
+    .allocstack 72
     .endprolog
     mov r15,rcx
     mov r13,rdx
+    movups xmm0,XMMWORD PTR [r8]
+    movups XMMWORD PTR [rsp+30h],xmm0
     mov rcx,r8
     movaps xmm0,xmm3
-    movss xmm1,DWORD PTR [rsp+60h]
+    movss xmm2,DWORD PTR [rsp+80h]
 GameNearestCoastFixture LABEL NEAR
-    comiss xmm1,xmm0
+    comiss xmm2,xmm0
     ja SHORT NearestCoastFixtureReject
 NearestCoastFixtureAccept LABEL NEAR
     mov al,1
@@ -366,7 +367,7 @@ NearestCoastFixtureAccept LABEL NEAR
 NearestCoastFixtureReject LABEL NEAR
     xor eax,eax
 NearestCoastFixtureReturn:
-    add rsp,40
+    add rsp,72
     pop r15
     pop r13
     ret
@@ -388,7 +389,7 @@ CaptureNearestCoastRegisters PROC
     movdqu XMMWORD PTR [r15+112],xmm3
     movdqu XMMWORD PTR [r15+128],xmm4
     movdqu XMMWORD PTR [r15+144],xmm5
-    add rsp,40
+    add rsp,72
     pop r15
     pop r13
     ret
@@ -398,11 +399,13 @@ TestNearestCoastRegisters PROC FRAME
     .pushreg r13
     push r15
     .pushreg r15
-    sub rsp,40
-    .allocstack 40
+    sub rsp,72
+    .allocstack 72
     .endprolog
     mov r15,rcx
     mov r13,rdx
+    movups xmm0,XMMWORD PTR [r8]
+    movups XMMWORD PTR [rsp+30h],xmm0
     mov rcx,r8
     mov eax,1
     movd xmm0,eax
@@ -436,7 +439,7 @@ GameAttackTickFixture PROC FRAME
     sub rsp,1c8h
     .allocstack 1c8h
     .endprolog
-    mov rax,QWORD PTR [rcx+3c20h]
+    mov rax,QWORD PTR [rcx+3c90h]
     mov rax,QWORD PTR [rax]
     mov eax,DWORD PTR [rax+0b8h]
     add rsp,1c8h

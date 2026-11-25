@@ -7,13 +7,13 @@ static void RunHousingReadTests(bool pending) {
     Require(MH_Initialize()==MH_OK,"Housing fixture initializes private hooks");
     auto site=reinterpret_cast<unsigned char*>(pending?&GameHousingPendingFixture:&GameHousingReadFixture);
     auto reader=pending?&TestPatchedHousingPendingRead:&TestPatchedHousingRead;
-    Require(Fingerprint(site,"488b8a0803000003394883c310"),"Housing fixture matches original pointer load, sum and iterator byte for byte");
+    Require(Fingerprint(site,"488b8ac802000003394883c310"),"Housing fixture matches original pointer load, sum and iterator byte for byte");
     std::array<unsigned char,0x320> camp{},house{};
-    void* marker=camp.data();std::memcpy(camp.data()+0x2e8,&marker,sizeof(marker));
+    void* marker=camp.data();std::memcpy(camp.data()+0x2a8,&marker,sizeof(marker));
     std::array<uint64_t,8> vanilla{},result{};
     int beds=25;
     int* capacity=&beds;
-    std::memcpy(camp.data()+0x308,&capacity,sizeof(capacity));std::memcpy(house.data()+0x308,&capacity,sizeof(capacity));
+    std::memcpy(camp.data()+0x2c8,&capacity,sizeof(capacity));std::memcpy(house.data()+0x2c8,&capacity,sizeof(capacity));
     const auto unchangedCamp=camp,unchangedHouse=house;
     reader(&beds,camp.data(),vanilla.data(),35);
     Require(vanilla[0]==60,"Original camp plus existing houses gives 25 + 35 beds");
@@ -83,6 +83,6 @@ static void RunHousingConfigTests() {
     Require(error.empty()&&campHousingSteps==10,"Native protocol restores x1 on disable");
     Status();
     std::ifstream f(folder+L"native-status.ini");std::string status((std::istreambuf_iterator<char>(f)),std::istreambuf_iterator<char>());
-    Require(status.find("Version=1.2.5\n")!=std::string::npos&&status.find("CampHousingSteps=10\n")!=std::string::npos,
+    Require(status.find("Version=1.2.6\n")!=std::string::npos&&status.find("CampHousingSteps=10\n")!=std::string::npos,
         "Native status acknowledges both new version and actual housing setting");
 }

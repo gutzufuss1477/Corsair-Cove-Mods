@@ -1,5 +1,5 @@
-CORSAIR COVE QOL TRAINER 1.2.5
-Release für Steam-Build 26091248 vom 29.10.2026
+CORSAIR COVE QOL TRAINER 1.2.6
+Release für Steam-Build 26758922 vom 25.11.2026
 https://www.nexusmods.com/corsaircove/mods/35
 
 INSTALLATION UND UPDATE
@@ -15,10 +15,11 @@ ist erforderlich. Vorhandene Einstellungen bleiben erhalten. Neue Optionen
 sind standardmäßig ausgeschaltet. Originale Spielprogramme und verpackte
 Spieldaten werden nicht ersetzt.
 
-NEU IN 1.2.5
-- Anpassung an Steam-Build 26091248 und die neue interne Warenverwaltung.
+NEU IN 1.2.6
+- Unterstützung für Patch 8 (1.8.0.250682, Steam-Build 26758922).
 - Aktualisierte Eingriffspunkte, Lagerkapazitäten, Wohnraum- und Angriffsdaten.
-- Mehr Details in CHANGELOG-1.2.5.txt.
+- Der Installer akzeptiert ausdrücklich eingetragene absolute UE4SS-Standardpfade.
+  Konfliktmeldungen nennen die Datei und bei Bedarf die betroffene Einstellung.
 
 BEREITS ENTHALTEN
 - Piratenlager-Wohnraum x1–100, einschließlich vorhandener Lagerboni.
@@ -46,7 +47,7 @@ Italienisch, Spanisch, brasilianisches Portugiesisch, Polnisch, Russisch,
 Japanisch, Koreanisch, vereinfachtes und traditionelles Chinesisch.
 
 KOMPATIBILITÄT UND ENTFERNEN
-Windows 10/11 x64, statisch geprüfter Steam-Build 26091248. Nicht unterstützte
+Windows 10/11 x64, statisch geprüfter Steam-Build 26758922. Nicht unterstützte
 Spielprogramme und inkompatible vorhandene Loader werden bei der Einrichtung
 abgewiesen. Andere Mod-Kombinationen sind nicht umfassend geprüft.
 
@@ -67,15 +68,13 @@ wieder ein. Einstellungen und Installationssicherungen:
 %LOCALAPPDATA%/CorsairCoveQoL
 
 PRÜFSTAND
-Bestanden: 5800 native Prüfungen, 64 Backend-Tests, 5231 UI-/Setup-Prüfungen
+Bestanden: 5800 native Prüfungen, 64 Backend-Tests, 5233 UI-/Setup-Prüfungen
 sowie die Code- und Paketprüfung gegen das installierte Spielupdate.
-Simon hat 1.2.5 kurz im aktualisierten Spiel getestet und bestätigt, dass es
-zu funktionieren scheint. Das ist kein umfassender Test sämtlicher Optionen,
-Quests, Karten oder Kombinationen mit anderen Mods.
+Das Upgrade von 1.2.5 mit vorhandenen Einstellungen wurde in einer isolierten Installation geprüft. Der Test im laufenden Spiel auf Patch 8 steht aus.
 
 Die EXE ist unsigniert. Frühere Entwicklungspakete wurden von Defender als
 DefenseEvasion.A!ml beziehungsweise Bearfoos.B!ml erkannt. Der lokale
-Defender-Scan der 1.2.5-EXE am 29.10.2026 meldete keinen Fund.
+Defender-Scan der 1.2.6-EXE am 25.11.2026 meldete keinen Fund.
 Eine offizielle Microsoft-Bestätigung als Fehlalarm liegt nicht vor.
 Bei Blockierung Schutz eingeschaltet lassen und Erkennung melden.
 Die Einrichtung verändert keine Virenschutz-Einstellungen.

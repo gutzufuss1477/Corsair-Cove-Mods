@@ -4,14 +4,11 @@
 #include <map>
 
 using WarehouseResolveFn=void*(*)(void*);
-// Build 26091248 moved storage into CItemStorage handles. Mirror the game's
-// GetStorage selector (RVA 5d8bd50), borrowing only during this game-thread call:
-// use the live override at +550, otherwise the primary at +540. Never retain a
-// dereferenceable handle or increment/decrement the engine's reference counts.
+// Borrow the live override or primary storage handle during the current model callback.
 static unsigned char* WarehouseStorage(unsigned char* structure,void*& control) {
-    auto handle=structure+0x550;
+    auto handle=structure+0x500;
     auto storage=HousingHandle(handle);
-    if(!storage) {handle=structure+0x540;storage=HousingHandle(handle);}
+    if(!storage) {handle=structure+0x4f0;storage=HousingHandle(handle);}
     control=storage?AttackRead<void*>(handle,8):nullptr;
     return static_cast<unsigned char*>(storage);
 }
@@ -41,18 +38,18 @@ struct WarehouseState {
         if(!configured||!model||!resolveAsset||!assetAddress)return;
         if(lastModel!=model){originals.clear();lastModel=model;}
         ++tick;
-        auto list=AttackRead<unsigned char*>(model,0x17b0);
-        const int count=AttackRead<int>(model,0x17b8);
+        auto list=AttackRead<unsigned char*>(model,0x1808);
+        const int count=AttackRead<int>(model,0x1810);
         invalid=count<0||count>65536||(count&&!list);
         if(invalid)return;
         int found=0;
         for(int i=0;i<count;++i) {
             auto s=static_cast<unsigned char*>(HousingHandle(list+16*i));
             if(!s)continue;
-            auto warehouse=AttackRead<unsigned char*>(s,0x268);
+            auto warehouse=AttackRead<unsigned char*>(s,0x228);
+            if(!warehouse||reinterpret_cast<uint64_t>(resolveAsset(s+0xd8))!=assetAddress)continue;
             void* storageControl=nullptr;
             auto storage=WarehouseStorage(s,storageControl);
-            if(!warehouse||reinterpret_cast<uint64_t>(resolveAsset(s+0x118))!=assetAddress)continue;
             if(!storage){invalid=true;continue;}
             const int initial=AttackRead<int>(warehouse,4);
             const int current=AttackRead<int>(warehouse,0);
@@ -62,7 +59,7 @@ struct WarehouseState {
                storage[4]!=1||entries<0||entries>4096||baseSlots<1||baseSlots>4096||
                (types!=3&&types!=6&&types!=9)) {invalid=true;continue;}
             ++found;
-            if(s==HousingHandle(static_cast<unsigned char*>(model)+0x20b8)) {
+            if(s==HousingHandle(static_cast<unsigned char*>(model)+0x2110)) {
                 selected=true;selectedResources=entries;
             }
             auto control=AttackRead<void*>(list+16*i,8);
@@ -84,7 +81,7 @@ struct WarehouseState {
                 capacity=types==3?old.capacity:std::max({int(baseSlots),old.capacity,initial*int(types)});
                 old.lastWarehouse=target;old.lastCapacity=capacity;
             }
-            if(selected&&s==HousingHandle(static_cast<unsigned char*>(model)+0x20b8))selectedSlots=target;
+            if(selected&&s==HousingHandle(static_cast<unsigned char*>(model)+0x2110))selectedSlots=target;
             if(current!=target||storageMax!=capacity) {
                 std::memcpy(warehouse,&target,sizeof(target));
                 std::memcpy(storage,&capacity,sizeof(capacity));
