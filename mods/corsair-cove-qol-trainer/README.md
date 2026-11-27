@@ -8,18 +8,18 @@
 
 | File / variant | Nexus file version | Nexus file ID |
 |---|---|---|
-| Corsair Cove QoL Trainer - Single EXE | 1.2.6 | 75 |
+| Corsair Cove QoL Trainer - Single EXE | 1.2.7 | 76 |
 
 File versions above are the actual download versions; the Nexus page version can differ.
 Only current published files are listed. Archived releases, comparisons and explicitly labelled tests are excluded.
 
 ## Compatibility and changes
 
-Version 1.2.6 supports **Patch 8 (1.8.0.250682), Steam build 26758922**. All 14 options are included. The installer now accepts explicit absolute paths to the default UE4SS mod directory and mod list. See [changelog](CHANGELOG.md) and [German instructions / credits](README_DE.txt).
+Version 1.2.7 supports **Patch 8 (1.8.0.250682), Steam build 26758922**. All 14 options are included. The installer now recognises equivalent absolute paths to the default UE4SS Mods folder and mods.txt, including paths containing `.` or `..`. See [changelog](CHANGELOG.md) and [German instructions / credits](README_DE.txt).
 
 ## Source and build
 
-Source for Patch 8 (1.8.0.250682), Steam build 26758922. The native, backend and setup checks passed, including an isolated upgrade from 1.2.5 with existing settings. In-game verification on Patch 8 is pending.
+Installer hotfix for Steam Patch 8 (1.8.0.250682), build 26758922. All 15 bundled runtime and gameplay files match 1.2.6. The packaged upgrade and 5,239 UI and setup checks passed.
 
 See `nexus.json` for the immutable file IDs and SHA-256 values.
 Build outputs, original game data, private diagnostics and credentials are kept out of Git.

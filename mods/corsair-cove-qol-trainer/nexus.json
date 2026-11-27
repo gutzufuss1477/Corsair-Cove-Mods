@@ -4,19 +4,19 @@
   "nexusGame": "corsaircove",
   "nexusModId": 35,
   "nexusUrl": "https://www.nexusmods.com/corsaircove/mods/35",
-  "pageVersion": "1.2.6",
+  "pageVersion": "1.2.7",
   "sourceStatus": "release-workspace",
-  "sourceNote": "Source for Patch 8 (1.8.0.250682), Steam build 26758922. The native, backend and setup checks passed, including an isolated upgrade from 1.2.5 with existing settings. In-game verification on Patch 8 is pending.",
+  "sourceNote": "Installer hotfix for Steam Patch 8 (1.8.0.250682), build 26758922. All 15 bundled runtime and gameplay files match 1.2.6. The packaged upgrade and 5,239 UI and setup checks passed.",
   "currentFiles": [
     {
-      "fileId": 75,
+      "fileId": 76,
       "name": "Corsair Cove QoL Trainer - Single EXE",
-      "version": "1.2.6",
+      "version": "1.2.7",
       "category": "MAIN",
-      "sha256": "6cda84657238706bfcd374e824c0d30d2938f41a8df66d6f2313fc3bda006683",
-      "bytes": 9443099,
-      "downloadUrl": "https://www.nexusmods.com/corsaircove/mods/35?tab=files&file_id=75",
-      "executableSha256": "8fd89da0d75426a081941427edc69c9bf29a123ed46ce0ae7f882d3c8da82246"
+      "sha256": "aec7357868dcfd7fa1cdf731373a8b5f08fc292bccb96aecc1a0991832508bb1",
+      "bytes": 9443227,
+      "downloadUrl": "https://www.nexusmods.com/corsaircove/mods/35?tab=files&file_id=76",
+      "executableSha256": "a8e4324473272ac9f0d0fccbf8b561a6b0afb200cae696f77491f1d64f396c82"
     }
   ],
   "steamBuild": 26758922,

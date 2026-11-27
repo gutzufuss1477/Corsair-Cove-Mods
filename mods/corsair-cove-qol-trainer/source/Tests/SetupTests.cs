@@ -24,6 +24,16 @@ internal static class SetupTests {
     var originalConfig=File.ReadAllBytes(config);
     File.WriteAllText(config,"[Overrides]\nModsFolderPath = "+mods+"\\\nControllingModsTxt = "+Path.Combine(mods,"mods.txt")+"\n");
     check(!Bootstrap.Plan(bin,data,payload).Needed,"explicit default mod paths coexist with existing loader settings");
+    string equivalent="[Overrides]\nModsFolderPath = "+bin+@"/ue4ss/./mOdS/"+"\nControllingModsTxt = "+mods+@"/../Mods/./mods.txt"+"\n";
+    File.WriteAllText(config,equivalent);
+    check(!Bootstrap.Plan(bin,data,payload).Needed&&File.ReadAllText(config)==equivalent,"equivalent absolute overrides preserve an existing install");
+    foreach(string path in new[]{mods+@"/../Other/mods.txt","mods.txt",Path.GetPathRoot(bin).TrimEnd('\\')+"mods.txt","\\mods.txt","bad|path"}) {
+      string setting="ControllingModsTxt = "+path;
+      File.WriteAllText(config,"[Overrides]\n"+setting+"\n");
+      rejected=false;
+      try{Bootstrap.Plan(bin,data,payload);}catch(SetupException ex){rejected=ex.Key=="loaderConflict"&&ex.Detail.Contains(setting);}
+      check(rejected,"invalid or redirected mod-list override retains conflict details: "+path);
+    }
     File.WriteAllText(config,"[Overrides]\nModsFolderPath = ../Shared\n");
     rejected=false;try{Bootstrap.Plan(bin,data,payload);}catch(SetupException ex){rejected=ex.Key=="loaderConflict"&&ex.Detail.Contains(config)&&ex.Detail.Contains("ModsFolderPath");}
     check(rejected,"redirected mod folder is identified before installation");

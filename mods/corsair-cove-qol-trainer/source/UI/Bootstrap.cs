@@ -109,6 +109,18 @@ namespace CoveQoLTrainer {
       if(File.Exists(full)&&(File.GetAttributes(full)&FileAttributes.ReparsePoint)!=0)throw new IOException("Reparse point: "+full);
       return full;
     }
+    static bool IsDefaultOverride(string value,string expected,bool directory) {
+      try {
+        // UE4SS overrides specify absolute paths. Never resolve a relative
+        // override against the trainer's working directory or current drive.
+        if(!string.Equals(Path.GetPathRoot(value),Path.GetPathRoot(expected),StringComparison.OrdinalIgnoreCase))return false;
+        string full=Path.GetFullPath(value);
+        if(directory)full=full.TrimEnd(Path.DirectorySeparatorChar);
+        return string.Equals(full,expected,StringComparison.OrdinalIgnoreCase);
+      }catch(ArgumentException){return false;}
+       catch(NotSupportedException){return false;}
+       catch(IOException){return false;}
+    }
     internal static SetupPlan Plan(string bin,string data,Dictionary<string,byte[]> payload) {
       var plan=new SetupPlan();
       string ue=SafeTarget(bin,"ue4ss/UE4SS.dll"),loader=SafeTarget(bin,"dwmapi.dll");
@@ -123,8 +135,7 @@ namespace CoveQoLTrainer {
           if(value.Length==0||value.StartsWith(";"))continue;
           bool directory=string.Equals(setting.Groups[1].Value,"ModsFolderPath",StringComparison.OrdinalIgnoreCase);
           string expected=SafeTarget(bin,directory?"ue4ss/Mods":"ue4ss/Mods/mods.txt");
-          if(directory)value=value.TrimEnd('\\');
-          if(!string.Equals(value,expected,StringComparison.OrdinalIgnoreCase))
+          if(!IsDefaultOverride(value,expected,directory))
             throw new SetupException("loaderConflict",ini+"\n"+line.Trim());
         }
       }

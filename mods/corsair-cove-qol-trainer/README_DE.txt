@@ -1,5 +1,5 @@
-CORSAIR COVE QOL TRAINER 1.2.6
-Release für Steam-Build 26758922 vom 25.11.2026
+CORSAIR COVE QOL TRAINER 1.2.7
+Release für Steam-Build 26758922 vom 27.11.2026
 https://www.nexusmods.com/corsaircove/mods/35
 
 INSTALLATION UND UPDATE
@@ -14,6 +14,10 @@ eingebettet; keine Zwischenversion und keine weitere manuelle Installation
 ist erforderlich. Vorhandene Einstellungen bleiben erhalten. Neue Optionen
 sind standardmäßig ausgeschaltet. Originale Spielprogramme und verpackte
 Spieldaten werden nicht ersetzt.
+
+NEU IN 1.2.7
+- Der Installer akzeptiert absolute UE4SS-Pfade mit . und .., wenn sie auf den
+  Standard-Modordner oder dessen mods.txt zeigen.
 
 NEU IN 1.2.6
 - Unterstützung für Patch 8 (1.8.0.250682, Steam-Build 26758922).
@@ -68,13 +72,14 @@ wieder ein. Einstellungen und Installationssicherungen:
 %LOCALAPPDATA%/CorsairCoveQoL
 
 PRÜFSTAND
-Bestanden: 5800 native Prüfungen, 64 Backend-Tests, 5233 UI-/Setup-Prüfungen
-sowie die Code- und Paketprüfung gegen das installierte Spielupdate.
-Das Upgrade von 1.2.5 mit vorhandenen Einstellungen wurde in einer isolierten Installation geprüft. Der Test im laufenden Spiel auf Patch 8 steht aus.
+Die gepackte 1.2.7-EXE bestand den Upgrade-Test mit vorhandenen Einstellungen,
+abweichender Pfadschreibweise und zusätzlichem Mod-Eintrag. 5.239 UI- und
+Setup-Prüfungen bestanden. Die 15 mitgelieferten Komponenten stimmen bytegenau
+mit Version 1.2.6 überein.
 
 Die EXE ist unsigniert. Frühere Entwicklungspakete wurden von Defender als
 DefenseEvasion.A!ml beziehungsweise Bearfoos.B!ml erkannt. Der lokale
-Defender-Scan der 1.2.6-EXE am 25.11.2026 meldete keinen Fund.
+Defender-Scan der 1.2.7-EXE am 27.11.2026 meldete keinen Fund.
 Eine offizielle Microsoft-Bestätigung als Fehlalarm liegt nicht vor.
 Bei Blockierung Schutz eingeschaltet lassen und Erkennung melden.
 Die Einrichtung verändert keine Virenschutz-Einstellungen.

@@ -1,7 +1,7 @@
 {
   "name": "corsair-cove-qol-source",
   "private": true,
-  "version": "1.2.6",
+  "version": "1.2.7",
   "scripts": {
     "test": "node Tests/run-backend.js"
   },

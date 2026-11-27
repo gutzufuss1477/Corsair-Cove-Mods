@@ -1,3 +1,8 @@
+# Version 1.2.7 — 2026-11-27
+
+- Fixed a false loader conflict when absolute paths in UE4SS-settings.ini contain . or .. and resolve to the default Mods folder or mods.txt.
+- Verified the upgrade from 1.2.6 with existing settings and a third-party mod entry on Steam Patch 8 (build 26758922).
+
 # Version 1.2.6 — 2026-11-25
 
 - Updated all 14 options for Corsair Cove 1.8.0.250682 (Patch 8, Steam build 26758922).
